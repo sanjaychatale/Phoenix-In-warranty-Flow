@@ -32,7 +32,7 @@ jobs:
                 newman run 'Inwarranty-flow Collection_data.postman_collection' \
                 -e QA.postman_environment.json \
                 -d testData.csv \
-                -r cli,htmlextra
+                -r cli,htmlextra \
                 --reporter-htmlextra-export ./newman/index.html
         - name : Newman Report
           if: always()
