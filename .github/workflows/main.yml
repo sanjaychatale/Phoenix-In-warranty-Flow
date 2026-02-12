@@ -5,7 +5,7 @@ on:
       branches:  [main]
     workflow_dispatch:
     schedule:
-      - cron: 30 02 * * *  #8:00 am IST every day
+      - cron: 30 02 * * 1-5  #8:00 am IST every day
       - cron: 00 14 * * 1-5  #7:30 pm IST Monday to Friday
 
 jobs:
