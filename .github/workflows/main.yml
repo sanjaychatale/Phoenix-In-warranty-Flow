@@ -1,0 +1,70 @@
+name : Postman Collection Workflow
+
+on:
+    push:
+      branches:  [main]
+    workflow_dispatch:
+    schedule:
+      - cron: 30 02 * * 1-5  #8:00 am IST every day
+      - cron: 00 14 * * 1-5  #7:30 pm IST Monday to Friday
+
+jobs:
+    run-postman-tests:
+      runs-on: ubuntu-latest
+
+      steps:
+        - name: Checkout the code
+          uses: actions/checkout@v6.0.2
+
+        - name : Install the Node Js and npm
+          uses: actions/setup-node@v6.2.0
+          with: 
+             node-version: '22'
+
+        
+        - name : Install npn newman and html extra
+          run: |
+               npm install -g newman
+               npm install -g newman-reporter-htmlextra
+
+        - name : Run the postman collection via newman
+          run : |
+                newman run 'Inwarranty-flow Collection_data.postman_collection' \
+                -e QA.postman_environment.json \
+                -d testData.csv \
+                -r cli,htmlextra \
+                --reporter-htmlextra-export ./newman/index.html
+        - name : Newman Report
+          if: always()
+          uses: actions/upload-artifact@v6.0.0
+          with:
+            name: Newman Report
+            path: newman/*.html
+            
+        - name : Creating gitHub Page branch
+          if: always()
+          uses: peaceiris/actions-gh-pages@v4.0.0
+          with:
+            github_token: ${{ secrets.GITHUB_TOKEN }}
+            publish_dir: newman/
+          
+        - name: Send email
+          if: always()
+          uses: dawidd6/action-send-mail@v9
+          with:
+            server_address: smtp.gmail.com
+            server_port : 465
+            username : ${{ secrets.EMAIL_USERNAME }}
+            password : ${{ secrets.EMAIL_PASSWORD }}
+            subject: Phoenix Inwarranty Flow Collection Report
+            to: sanjaychatale@gmail.com
+            from:  ${{ secrets.EMAIL_USERNAME }}
+            body: |
+                Hi,
+                The Phoenix Inwarranty Flow Collection has been executed and the report is published.
+                Please find URL is https://sanjaychatale.github.io/Phoenix-In-warranty-Flow/
+         
+            
+            
+          
+        
